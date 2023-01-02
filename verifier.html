@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<style>
+table, td, th {
+    border: 1px solid black;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td.hover {
+    background-color: cyan;
+}
+
+div.del {
+    background-color: rgba(248, 81, 73, 0.15);
+}
+
+div.del > span {
+    background-color: rgba(248, 81, 73, 0.4);
+}
+
+div.ins {
+    background-color: rgba(46, 160, 67, 0.15);
+}
+
+div.ins > span {
+    background-color: rgba(46, 160, 67, 0.4);
+}
+</style>
+<script>
+$_GET = location.search.startsWith('?')
+    ? location.search.slice(1).split(',').map(v => v.split('=').map(t => decodeURIComponent(t))).reduce((v, t) => { v[t[0]] = t[1]; return v }, {})
+    : {}
+
+const test = () => {
+    let l = document.getElementById('test-1').value
+    let r = document.getElementById('test-2').value
+
+    const rv = l.distance2(r)
+    console.log(rv)
+
+    const replace = (s, r) => `${s.substr(0, r[0])}<span>${s.substr(r[0], r[1])}</span>${s.substr(r[0] + r[1])}`
+    l = rv.l.reduce(replace, l)
+    r = rv.r.reduce(replace, r)
+
+    const div1 = document.body.appendChild(document.createElement('div'))
+    div1.className = 'del'
+    div1.innerHTML = l
+
+    const div2 = document.body.appendChild(document.createElement('div'))
+    div2.className = 'ins'
+    div2.innerHTML = r
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    Array.iota = (n, begin) => {
+        begin = begin ?? 0
+        const a = new Array(n)
+        for (let i = 0; i < n; ++i) {
+            a[i] = i + begin
+        }
+        return a
+    }
+
+    Array.prototype.all = function (predicate) {
+        return this.reduce((all, element) => all && predicate(element), true)
+    }
+
+    Array.prototype.any = function (predicate) {
+        return this.reduce((any, element) => any || predicate(element), false)
+    }
+
+    Array.prototype.toDictionary = function (keySelector, valueSelector) {
+        return this.reduce((dictionary, element) => {
+            dictionary[keySelector(element)] = valueSelector(element)
+            return dictionary
+        }, {})
+    }
+
+    Array.prototype.distinct = function () {
+        return Object.keys(this.toDictionary(x => x, x => true))
+    }
+
+    String.prototype.distance = function (other) {
+        // case insensitive
+        const l = this.toUpperCase()
+        const r = other.toUpperCase()
+
+        let dp = Array.iota(r.length + 1)
+        for (let i = 0; i < l.length; ++i) {
+            let dp2 = new Array(r.length + 1)
+            dp2[0] = i + 1
+            for (let j = 0; j < r.length; ++j) {
+                if (l[i] === r[j]) {
+                    dp2[j + 1] = dp[j]
+                } else {
+                    dp2[j + 1] = Math.min(dp[j + 1], dp2[j]) + 1
+                }
+            }
+            dp = dp2
+        }
+
+        return dp[r.length]
+    }
+
+    String.prototype.distance2 = function (other) {
+        const l = this
+        const r = other
+        
+        const dp = new Array(l.length + 1).fill(null).map((_, i) => Array.iota(r.length + 1, i).map(n => ({ d: n, dx: 0, dy: 0})))
+        for (let i = 1; i <= l.length; ++i) {
+            dp[i][0].dy = -1
+        }
+        for (let i = 1; i <= r.length; ++i) {
+            dp[0][i].dx = -1
+        }
+
+        for (let i = 1; i <= l.length; ++i) {
+            for (let j = 1; j <= r.length; ++j) {
+                if (l[i - 1] === r[j - 1]) {
+                    dp[i][j] = { d: dp[i - 1][j - 1].d, dx: -1, dy: -1 }
+                } else if (dp[i - 1][j].d < dp[i][j - 1].d) {
+                    dp[i][j] = { d: dp[i - 1][j].d + 1, dx: 0, dy: -1 }
+                } else {
+                    dp[i][j] = { d: dp[i][j - 1].d + 1, dx: -1, dy: 0}
+                }
+            }
+        }
+
+        const ai = []
+        const aj = []
+
+        for (let i = l.length, j = r.length; i > 0 || j > 0;) {
+            const v = dp[i][j]
+
+            if (v.dx === v.dy) {
+                // noop
+            } else if (v.dy === -1) {
+                ai.push(i - 1)
+            } else {
+                aj.push(j - 1)
+            }
+
+            i += v.dy
+            j += v.dx
+        }
+
+        if ($_GET['debug'] === 'true') {
+            const nthChild = e => {
+                let n = 0
+                for (; e; e = e.previousElementSibling) {
+                    ++n
+                }
+                return n
+            }
+
+            const table = document.body.appendChild(document.createElement('table'))
+            for (let i = 0; i <= l.length; ++i) {
+                const tr = table.appendChild(document.createElement('tr'))
+                for (let j = 0; j <= r.length; ++j) {
+                    const td = tr.appendChild(document.createElement('td'))
+                    td.addEventListener('mouseenter', () => {
+                        const x = nthChild(td) - 1
+                        const y = nthChild(td.parentElement) - 1
+                        for (let i = 0; i < table.children.length; ++i) {
+                            table.children[i].children[x].classList.add('hover')
+                        }
+                        for (let i = 0; i < table.children[y].children.length; ++i) {
+                            table.children[y].children[i].classList.add('hover')
+                        }
+                    })
+                    td.addEventListener('mouseleave', () => {
+                        const x = nthChild(td) - 1
+                        const y = nthChild(td.parentElement) - 1
+                        for (let i = 0; i < table.children.length; ++i) {
+                            table.children[i].children[x].classList.remove('hover')
+                        }
+                        for (let i = 0; i < table.children[y].children.length; ++i) {
+                            table.children[y].children[i].classList.remove('hover')
+                        }
+                    })
+                }
+            }
+            for (let i = 1; i <= l.length; ++i) {
+                table.children[i].children[0].textContent = l[i - 1]
+            }
+            for (let i = 1; i <= r.length; ++i) {
+                table.children[0].children[i].textContent = r[i - 1]
+            }
+            for (let i = l.length, j = r.length; i > 0 || j > 0;) {
+                table.children[i].children[j].style.backgroundColor = 'red'
+
+                const v = dp[i][j]
+                i += v.dy
+                j += v.dx
+            }
+        }
+
+        const group = a => {
+            if (a.length === 0) {
+                return []
+            }
+
+            const groups = []
+            let i = 0
+            for (let j = 1; j < a.length; ++j) {
+                if (a[j - 1] - a[j] > 1) {
+                    groups.push([a[j - 1], j - i])
+                    i = j
+                }
+            }
+            groups.push([a[a.length - 1], a.length - i])
+            return groups
+        }
+
+        return { d: dp[l.length][r.length].d, l: group(ai), r: group(aj) }
+    }
+
+    const sleep = ms => new Promise(resolve => {
+        setTimeout(resolve, ms)
+    })
+
+    const uploadFile = () => new Promise(resolve => {
+        const fileInput = document.createElement('input')
+        fileInput.type = 'file'
+        fileInput.addEventListener('change', e => {
+            resolve(e.target.files[0])
+        })
+        fileInput.click()
+    })
+
+    const readTextFile = file => new Promise(resolve => {
+        const fileReader = new FileReader()
+        fileReader.addEventListener('load', e => {
+            resolve(e.target.result)
+        })
+        fileReader.readAsText(file)
+    })
+
+    const readCsvFileImpl = text => {
+        let lines = []
+        let values = []
+        let value = ''
+        let inString = false
+        let ln = 1
+        let col = 0
+        for (const c of text) {
+            ++col
+            switch (c) {
+                case '"':
+                    inString = !inString
+                    break
+
+                case '\r':
+                    --col
+                    break
+
+                case '\n':
+                    if (inString) {
+                        value += c
+                    } else {
+                        values.push(value.trim())
+                        if ((lines.length > 0) && (values.length !== lines[0].length)) {
+                            throw new Error(`Error at line ${ln} column ${col}`)
+                        }
+                        lines.push(values)
+                        value = ''
+                        values = []
+                        ++ln
+                        col = 0
+                    }
+                    break
+
+                case ',':
+                    if (inString) {
+                        value += c
+                    } else {
+                        values.push(value.trim())
+                        value = ''
+                    }
+                    break
+
+                default:
+                    value += c
+                    break
+            }
+        }
+        values.push(value.trim())
+        if ((lines.length > 0) && (values.length !== lines[0].length)) {
+            throw new Error(`Error at line ${ln} column ${col}`)
+        }
+        lines.push(values)
+        return lines
+    }
+
+    const readCsvFile = file => readTextFile(file).then(readCsvFileImpl)
+
+    class CommaSeparatedValues extends Array {
+        static get[Symbol.species]() {
+            return Array
+        }
+
+        static async fromFile(file) {
+            const csv = await readCsvFile(file)
+            return new CommaSeparatedValues(...csv)
+        }
+
+        get header() {
+            return this[0]
+        }
+
+        get values() {
+            return this.slice(1)
+        }
+
+        columnIndex(columnName) {
+            if (typeof(columnName) === 'number') {
+                return columnName
+            }
+
+            if (Array.isArray(columnName)) {
+                return this.columnIndex(columnName.find(name => this.columnIndex(name) !== -1))
+            }
+
+            return this.header.indexOf(columnName)
+        }
+
+        column(i) {
+            i = this.columnIndex(i)
+            return this.values.map(row => row[i])
+        }
+
+        filterColumn(i, predicate) {
+            i = this.columnIndex(i)
+            return new CommaSeparatedValues(this.header, ...this.values.filter(x => predicate(x[i])))
+        }
+
+        groupBy(...indices) {
+            indices = indices.map(i => this.columnIndex(i))
+
+            const groups = this.values.reduce((groups, row) => {
+                const groupName = JSON.stringify(indices.map(i => row[i]))
+                groups[groupName] = groups[groupName] ?? [this.header]
+                groups[groupName].push(row)
+                return groups
+            }, {})
+
+            return Object.keys(groups).map(groupName => new CsvGroup(JSON.parse(groupName), groups[groupName]))
+        }
+
+        sum(...indices) {
+            indices = indices.map(i => this.columnIndex(i))
+
+            const sum = this.values.reduce((sum, row) => {
+                indices.forEach(i => sum[i] = (+sum[i]) + (+row[i]))
+                return sum
+            })
+
+            return new CommaSeparatedValues(this.header, sum)
+        }
+    }
+
+    const reports = new Array(2)
+
+    const reportDiv = i => {
+        const root = document.body.appendChild(document.createElement('div'))
+        const div = root.appendChild(document.createElement('div'))
+        const button = div.appendChild(document.createElement('button'))
+        const span = div.appendChild(document.createElement('span'))
+        const table = root.appendChild(document.createElement('table'))
+
+        button.textContent = `Report ${i + 1}`
+        button.addEventListener('click', async () => {
+            const file = await uploadFile()
+            if (!file) {
+                return
+            }
+            span.textContent = file.name
+            reports[i] = await CommaSeparatedValues.fromFile(file)
+
+            const cols = reports[i].header.map(col => {
+                const th = document.createElement('th')
+                th.textContent = col
+
+                const td = document.createElement('td')
+                td.innerHTML = '<input type="text" />'
+
+                return { th, td }
+            })
+
+            table.textContent = ''
+
+            cols.reduce((tr, col) => {
+                tr.appendChild(col.th)
+                return tr
+            }, table.appendChild(document.createElement('thead').appendChild(document.createElement('tr'))))
+
+            cols.reduce((tr, col) => {
+                tr.appendChild(col.td)
+                return tr
+            }, table.appendChild(document.createElement('tbody').appendChild(document.createElement('tr'))))
+        })
+
+        return root
+    }
+
+    const transform = (report, reportDiv) => {
+        const selectors = [...reportDiv.querySelectorAll('input[type=text]')]
+            .map(textInput => textInput.value || 'x')
+            .map(f => Function('x', `'use strict'; return ${f}`))
+        return report.values.map(row => selectors.map((f, i) => f(row[i])))
+    }
+    
+    const reportDiv1 = reportDiv(0)
+    const reportDiv2 = reportDiv(1)
+
+    const verifyBtn = document.body.appendChild(document.createElement('div')).appendChild(document.createElement('button'))
+    verifyBtn.textContent = 'Verify'
+
+    const cancelBtn = verifyBtn.parentElement.appendChild(document.createElement('button'))
+    cancelBtn.textContent = 'Cancel'
+
+    const resultDiv = document.body.appendChild(document.createElement('div'))
+
+    let canceled = false
+
+    verifyBtn.addEventListener('click', async () => {
+        resultDiv.textContent = ''
+
+        let cnt = {}
+        cnt = transform(reports[0], reportDiv1).reduce((dict, row) => {
+            const key = row.join(',')
+            dict[key] = (dict[key] ?? 0) + 1
+            return dict
+        }, cnt)
+        cnt = transform(reports[1], reportDiv2).reduce((dict, row) => {
+            const key = row.join(',')
+            dict[key] = (dict[key] ?? 0) - 1
+            return dict
+        }, cnt)
+
+        const recordsNotFoundInReport2 = Object.keys(cnt).filter(key => cnt[key] > 0)
+        const recordsNotFoundInReport1 = Object.keys(cnt).filter(key => cnt[key] < 0)
+
+        const replace = (s, r) => `${s.substr(0, r[0])}<span>${s.substr(r[0], r[1])}</span>${s.substr(r[0] + r[1])}`
+
+        const show = async (lhs, rhs, textContent) => {
+            const div = resultDiv.appendChild(document.createElement('div'))
+
+            const textDiv = div.appendChild(document.createElement('div'))
+            textDiv.textContent = textContent
+
+            for (const l of lhs) {
+                if (canceled) {
+                    break
+                }
+
+                let dmin = Number.MAX_VALUE
+                let vmin = null
+                for (const r of rhs) {
+                    const d = l.distance2(r)
+                    if (d.d < dmin) {
+                        dmin = d.d
+                        vmin = { r, d }
+                    }
+                }
+
+                const ldiv = div.appendChild(document.createElement('div'))
+                ldiv.className = 'del'
+                ldiv.innerHTML = vmin.d.l.reduce(replace, l)
+
+                const rdiv = div.appendChild(document.createElement('div'))
+                rdiv.className = 'ins'
+                rdiv.innerHTML = vmin.d.r.reduce(replace, vmin.r)
+
+                await sleep(10)
+            }
+        }
+
+        await show(recordsNotFoundInReport2, recordsNotFoundInReport1, 'Records not found in report 2')
+        await show(recordsNotFoundInReport1, recordsNotFoundInReport2, 'Records not found in report 1')
+
+        canceled = false
+    })
+
+    cancelBtn.addEventListener('click', () => {
+        canceled = true
+    })
+})
+</script>

@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<style>
+@font-face {
+  font-family: 'Labilgrotesk';
+  src: url('https://assets.website-files.com/61fcf661d5fa0f6756473fea/6203701e55b98b07b245669c_LabilGrotesk-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Labilgrotesk';
+  src: url('https://assets.website-files.com/61fcf661d5fa0f6756473fea/6203701e9b80fb6c3003d593_LabilGrotesk-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+    --main-bg-color: #150050;
+    --frma-blue: #5e85fe;
+    --frma-blue-darker: #4967e5;
+    --frma-pink: #fa9bfa;
+    --frma-red: #ef6051;
+    --frma-red-darker: #c95144;
+    --frma-yellow: #facf18;
+}
+
+body {
+    background-color: var(--main-bg-color);
+    font-family: 'Labilgrotesk', sans-serif;
+    height: 100%;
+    left: 0;
+    margin: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+button {
+    background-color: var(--frma-blue-darker);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: 'Labilgrotesk', sans-serif;
+    /* margin-inline-end: 8px; */
+    margin-inline: 4px;
+    min-width: 96px;
+    padding: 8px;
+}
+
+button:hover:not(:disabled) {
+    background-color: var(--frma-blue);
+    cursor: pointer;
+}
+
+button:active:not(:disabled) {
+    transform: translate(1px, 1px);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+p {
+    margin: 0;
+}
+
+input[type=checkbox] {
+    display: none;
+}
+
+input[type=checkbox] + label {
+    border-radius: 8px;
+    color: rgba(0, 0, 0, 0.5);
+    display: block;
+    margin-block-end: 4px;
+    margin-block-start: 4px;
+    padding: 8px;
+}
+
+input[type=checkbox] + label:hover {
+    background-color: var(--frma-blue) !important;
+    color: white;
+    cursor: pointer;
+}
+
+input[type=checkbox] + label:active {
+    transform: translate(1px, 1px);
+}
+
+input[type=checkbox]:checked + label {
+    background-color: var(--frma-blue-darker);
+    color: white;
+}
+
+input[type=checkbox]:disabled + label {
+    display: none;
+}
+
+input[type=text] {
+    background-color: transparent;
+    border-bottom: 1px solid var(--frma-blue);
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    font-family: inherit;
+    font-size: inherit;
+    margin-inline-end: 8px;
+    padding-bottom: 7px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+}
+
+input[type=text]:focus-visible {
+    background-color: white;
+    border-bottom: none;
+    border-radius: 8px;
+    box-shadow: 0 0 3px var(--frma-blue);
+    color: var(--frma-blue);
+    outline: none;
+    padding-bottom: 8px;
+}
+
+.page {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    transition: all 0.5s;
+    width: 100%;
+}
+
+.canvas {
+    background-color: rgba(255,255,255,0.8);
+    border-radius: 8px;
+    bottom: 64px;
+    left: 64px;
+    position: absolute;
+    right: 64px;
+    top: 64px;
+}
+
+.title {
+    height: 64px;
+    left: 16px;
+    line-height: 64px;
+    margin: 0;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+}
+
+.action-bar {
+    height: 48px;
+    left: 16px;
+    line-height: 48px;
+    position: absolute;
+    right: 16px;
+    top: 80px;
+}
+
+.action-bar-floater {
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.content {
+    bottom: 16px;
+    left: 16px;
+    margin: 0;
+    position: absolute;
+    right: 16px;
+    top: 128px;
+}
+
+.tab-view {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.tab-view-tabs {
+    border-bottom: 1px solid #150050;
+    box-sizing: border-box;
+    height: 48px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.tab-view-body {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 48px;
+}
+
+.tab-view-tab-radio {
+    display: none;
+}
+
+.tab-view-tab-label {
+    align-items: center;
+    color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    float: left;
+    font-weight: bold;
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    transition: all 0.5s;
+}
+
+.tab-view-tab-label:hover {
+    color: var(--frma-blue);
+    cursor: pointer;
+}
+
+.tab-view-tab-label.checked {
+    color: var(--frma-blue-darker);
+}
+
+.tab-view-tab-label::after {
+    bottom: -1px;
+    content: '';
+    display: block;
+    height: 0;
+    left: 50%;
+    position: absolute;
+    transition: all 0.3s;
+    width: 0;
+}
+
+.tab-view-tab-label.checked::after {
+    background-color: var(--frma-blue-darker);
+    height: 4px;
+    left: 0;
+    width: 100%;
+}
+
+.tab-view-content {
+    display: none;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.tab-view-content.checked {
+    display: block;
+}
+
+.revision-box {
+    background-color: white;
+    border-radius: 8px;
+    float: left;
+    margin: 8px;
+    padding: 8px;
+}
+
+.revision-box > .revision-box-actual-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.revision-box > .revision-box-actual-value.empty {
+    color: rgba(0, 0, 0, 0.5);
+    font-style: italic;
+}
+
+.revision-box::before {
+    content: '';
+    display: block;
+    height: 4px;
+    margin-block-end: 4px;
+}
+
+.revision-box[trust-level='0'] {
+    display: none;
+}
+
+.revision-box[trust-level='1']::before {
+    background-color: green;
+}
+
+.revision-box[trust-level='2']::before {
+    background-color: gold;
+}
+
+.revision-box[trust-level='3']::before {
+    background-color: red;
+}
+
+.no-revision-box {
+    color: rgba(0, 0, 0, 0.5);
+    font-size: x-large;
+    font-style: italic;
+}
+
+.pay-code-rule-config-preview {
+    height: 35%;
+    left: 0;
+    overflow-y: auto;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+.pay-code-rule-config-preview > p {
+    background-color: var(--frma-blue-darker);
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: white;
+    left: 0;
+    overflow-wrap: break-word;
+    padding: 16px;
+    position: absolute;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.pay-code-rule-config-preview > p:hover {
+    background-color: var(--frma-blue);
+    cursor: pointer;
+}
+
+.pay-code-rule-config-preview > .selected {
+    background-color: var(--frma-blue);
+}
+
+.pay-code-rule-config {
+    bottom: 0;
+    height: 65%;
+    left: 0;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+}
+
+.pay-code-rule-config table {
+    width: 100%;
+}
+
+.pay-code-rule-config td {
+    vertical-align: top;
+}
+
+.available-columns {
+    float: left;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 16px;
+    /* position: absolute; */
+    /* right: 50%; */
+    /* top: 0; */
+}
+
+.selected-columns {
+    float: left;
+    height: 100%;
+    overflow-y: auto;
+    padding-left: 16px;
+    /* position: absolute; */
+    /* left: 50%; */
+    /* top: 0; */
+}
+
+.selected-columns p {
+    margin-block-end: 4px;
+    margin-block-start: 4px;
+}
+
+.selected-columns input[type=text] ~ select {
+    margin-inline-end: 8px;
+}
+
+.selected-columns input[type=text] ~ a {
+    font-size: small;
+    margin-inline-end: 4px;
+}
+</style>
+<script>
+const $_GLOBALS = {}
+
+document.addEventListener('DOMContentLoaded', () => {
+    Array.iota = n => {
+        const a = new Array(n)
+        for (let i = 0; i < n; ++i) {
+            a[i] = i
+        }
+        return a
+    }
+
+    Array.prototype.all = function (predicate) {
+        return this.reduce((all, element) => all && predicate(element), true)
+    }
+
+    Array.prototype.any = function (predicate) {
+        return this.reduce((any, element) => any || predicate(element), false)
+    }
+
+    Array.prototype.toDictionary = function (keySelector, valueSelector) {
+        return this.reduce((dictionary, element) => {
+            dictionary[keySelector(element)] = valueSelector(element)
+            return dictionary
+        }, {})
+    }
+
+    Array.prototype.distinct = function () {
+        return Object.keys(this.toDictionary(x => x, x => true))
+    }
+
+    String.prototype.distance = function (other) {
+        // case insensitive
+        const l = this.toUpperCase()
+        const r = other.toUpperCase()
+
+        let dp = Array.iota(r.length + 1)
+        for (let i = 0; i < l.length; ++i) {
+            let dp2 = new Array(r.length + 1)
+            dp2[0] = i + 1
+            for (let j = 0; j < r.length; ++j) {
+                if (l[i] === r[j]) {
+                    dp2[j + 1] = dp[j]
+                } else {
+                    dp2[j + 1] = Math.min(dp[j + 1], dp2[j]) + 1
+                }
+            }
+            dp = dp2
+        }
+
+        return dp[r.length]
+    }
+
+    const uuidv4 = () => {
+        // don't use crypto.randomUUID even if it's available
+        // code is from https://stackoverflow.com/a/2117523
+        return `${1e7}-${1e3}-${4e3}-${8e3}-${1e11}`.replace(
+            /[018]/g,
+            c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
+    }
+
+    const sleep = ms => new Promise(resolve => {
+        setTimeout(resolve, ms)
+    })
+
+    const uploadFile = () => new Promise(resolve => {
+        const fileInput = document.createElement('input')
+        fileInput.type = 'file'
+        fileInput.addEventListener('change', e => {
+            resolve(e.target.files[0])
+        })
+        fileInput.click()
+    })
+
+    const readTextFile = file => new Promise(resolve => {
+        const fileReader = new FileReader()
+        fileReader.addEventListener('load', e => {
+            resolve(e.target.result)
+        })
+        fileReader.readAsText(file)
+    })
+
+    const readCsvFileImpl = text => {
+        let lines = []
+        let values = []
+        let value = ''
+        let inString = false
+        let ln = 1
+        let col = 0
+        for (const c of text) {
+            ++col
+            switch (c) {
+                case '"':
+                    inString = !inString
+                    break
+
+                case '\r':
+                    --col
+                    break
+
+                case '\n':
+                    if (inString) {
+                        value += c
+                    } else {
+                        values.push(value.trim())
+                        if ((lines.length === 0) || (values.length === lines[0].length)) {
+                            lines.push(values)
+                        } else {
+                            console.warn(`Skipped line: '${values.join(',')}'`)
+                        }
+                        value = ''
+                        values = []
+                        ++ln
+                        col = 0
+                    }
+                    break
+
+                case ',':
+                    if (inString) {
+                        value += c
+                    } else {
+                        values.push(value.trim())
+                        value = ''
+                    }
+                    break
+
+                default:
+                    value += c
+                    break
+            }
+        }
+        values.push(value.trim())
+        if ((lines.length === 0) || (values.length === lines[0].length)) {
+            lines.push(values)
+        } else {
+            console.warn(`Skipped line: '${values.join(',')}'`)
+        }
+        return lines
+    }
+
+    const readCsvFile = file => readTextFile(file).then(readCsvFileImpl)
+
+    const switchPage = (delta, initialize) => {
+        const nextPage = $_GLOBALS['currentPage'] + delta
+        if ((nextPage < 0) || (nextPage >= $_GLOBALS['pages'].length)) {
+            return
+        }
+
+        $_GLOBALS['currentPage'] = nextPage
+        $_GLOBALS['pages'].forEach((page, i) => {
+            page.dom.style.left = `${i - nextPage}00%`
+        })
+
+        if (initialize) {
+            $_GLOBALS['pages'][nextPage].initialize()
+        }
+    }
+
+    const downloadFile = (mime, name, content) => {
+        const href = `data:${mime};charset=utf-8,${encodeURIComponent(content)}`
+        const a = document.createElement('a')
+        a.href = href
+        a.download = name
+        a.click()
+    }
+
+    class CommaSeparatedValues extends Array {
+        static get[Symbol.species]() {
+            return Array
+        }
+
+        static async fromFile(file) {
+            const csv = await readCsvFile(file)
+            return new CommaSeparatedValues(...csv)
+        }
+
+        get header() {
+            return this[0]
+        }
+
+        get values() {
+            return this.slice(1)
+        }
+
+        columnIndex(columnName) {
+            if (typeof(columnName) === 'number') {
+                return columnName
+            }
+
+            if (Array.isArray(columnName)) {
+                //return this.columnIndex(columnName.find(name => this.columnIndex(name) !== -1))
+                for (const name of columnName) {
+                    const i = this.columnIndex(name)
+                    if (i !== -1) {
+                        return i
+                    }
+                }
+                return -1
+            }
+
+            return this.header.indexOf(columnName)
+        }
+
+        select(...columns) {
+            const indices = columns.map(column => this.columnIndex(column))
+            return new CommaSeparatedValues(...this.map(row => indices.map(i => row[i])))
+        }
+
+        where(i, predicate) {
+            i = this.columnIndex(i)
+            return new CommaSeparatedValues(this.header, ...this.values.filter(row => predicate(row[i])))
+        }
+
+        groupBy(...columns) {
+            const indices = columns.map(column => this.columnIndex(column))
+            const groups = this.values.reduce((groups, row) => {
+                const name = JSON.stringify(indices.map(i => row[i]))
+                groups[name] = groups[name] ?? [this.header]
+                groups[name].push(row)
+                return groups
+            }, {})
+            return Object.keys(groups).map(name => new CsvGroup(JSON.parse(name), groups[name]))
+        }
+
+        sum(...indices) {
+            indices = indices.map(i => this.columnIndex(i))
+
+            const sum = this.values.reduce((sum, row) => {
+                sum = [...sum]
+                indices.forEach(i => sum[i] = (+sum[i]) + (+row[i]))
+                return sum
+            })
+
+            // try to eliminate precision error
+            indices.forEach(i => {
+                sum[i] = Math.round(sum[i] * 100) / 100
+            })
+
+            return new CommaSeparatedValues(this.header, sum)
+        }
+    }
+
+    class CsvGroup extends CommaSeparatedValues {
+        static get[Symbol.species]() {
+            return CommaSeparatedValues
+        }
+
+        constructor(name, csv) {
+            super(...csv)
+
+            this._name = name
+        }
+
+        get name() {
+            return this._name
+        }
+    }
+
+    class TabView {
+        constructor(cfg) {
+            cfg = cfg ?? {}
+
+            this._name = `tab-view-${uuidv4()}`
+
+            this._view = document.createElement('div')
+            this._view.className = 'tab-view'
+
+            this._tabs = this._view.appendChild(document.createElement('div'))
+            this._tabs.className = 'tab-view-tabs'
+            if (cfg.tabHeight != null) {
+                this._tabs.style.height = `${cfg.tabHeight}px`
+            }
+
+            this._body = this._view.appendChild(document.createElement('div'))
+            this._body.className = 'tab-view-body'
+            if (cfg.tabHeight != null) {
+                this._body.style.top = `${cfg.tabHeight}px`
+            }
+        }
+
+        get dom() {
+            return this._view
+        }
+
+        get body() {
+            return this._body
+        }
+
+        add(labelText, content) {
+            const tabId = `tab-${uuidv4()}`
+
+            const checked = this._tabs.children.length === 0
+
+            const radio = this._tabs.appendChild(document.createElement('input'))
+            radio.type = 'radio'
+            radio.id = tabId
+            radio.className = 'tab-view-tab-radio'
+            radio.name = this._name
+            radio.checked = checked
+
+            const label = this._tabs.appendChild(document.createElement('label'))
+            label.className = 'tab-view-tab-label'
+            if (checked) {
+                label.classList.add('checked')
+            }
+            label.setAttribute('for', tabId)
+            label.textContent = labelText
+
+            const tabs = this._tabs.querySelectorAll('label')
+            const width = 100 / tabs.length
+            tabs.forEach((tab, i) => {
+                tab.style.left = `${width * i}%`
+                tab.style.width = `${width}%`
+            })
+
+            content.classList.add('tab-view-content')
+            if (checked) {
+                content.classList.add('checked')
+            }
+            this._body.appendChild(content)
+
+            radio.addEventListener('change', () => {
+                label.classList.add('checked')
+                content.classList.add('checked')
+
+                const uncheckEvent = document.createEvent('Event')
+                uncheckEvent.initEvent('uncheck', false, true)
+                this._view.querySelectorAll('input[type=radio]:not(:checked)').forEach(target => {
+                    target.dispatchEvent(uncheckEvent)
+                })
+            })
+
+            radio.addEventListener('uncheck', () => {
+                label.classList.remove('checked')
+                content.classList.remove('checked')
+            })
+        }
+    }
+
+    class CheckboxGroup {
+        constructor(cfg) {
+            this._cfg = cfg ?? {}
+            this._checkboxes = []
+            this._elements = []
+
+            this.add('(Select all)')
+        }
+
+        get checkboxes() {
+            return this._checkboxes
+        }
+
+        add(labelText) {
+            const id = `checkbox-${uuidv4()}`
+
+            const listener = (this._checkboxes.length === 0)
+                ? e => this.selectAll(e)
+                : e => this.allSelected(e)
+
+            const checkbox = document.createElement('input')
+            checkbox.id = id
+            checkbox.type = 'checkbox'
+            checkbox.addEventListener('change', listener)
+
+            if (this._cfg.checkboxClass != null) {
+                checkbox.className = this._cfg.checkboxClass
+            }
+
+            if (this._cfg.listener != null) {
+                checkbox.addEventListener('change', () => this._cfg.listener(this))
+            }
+
+            if (this._cfg.checked != null) {
+                checkbox.checked = this._cfg.checked
+            }
+
+            const label = document.createElement('label')
+            label.textContent = labelText
+            label.setAttribute('for', id)
+
+            if (this._cfg.labelClass != null) {
+                label.className = this._cfg.labelClass
+            }
+
+            this._checkboxes.push(checkbox)
+            this._elements.push(checkbox, label)
+        }
+
+        appendTo(element) {
+            element.append(...this._elements)
+            return element
+        }
+
+        selectAll() {
+            this._checkboxes.slice(1).forEach(checkbox => {
+                checkbox.checked = this._checkboxes[0].checked
+            })
+        }
+
+        allSelected() {
+            this._checkboxes[0].checked = this._checkboxes.slice(1).all(checkbox => checkbox.checked)
+        }
+    }
+
+    class Page {
+        constructor(title) {
+            this._page = document.createElement('div')
+            this._page.className = 'page'
+
+            this._canvas = this._page.appendChild(document.createElement('div'))
+            this._canvas.className = 'canvas'
+
+            this._title = this._canvas.appendChild(document.createElement('h1'))
+            this._title.className = 'title'
+            this._title.textContent = title
+
+            this._actionBar = this._canvas.appendChild(document.createElement('p'))
+            this._actionBar.className = 'action-bar'
+
+            this._content = this._canvas.appendChild(document.createElement('div'))
+            this._content.className = 'content'
+        }
+
+        get dom() {
+            return this._page
+        }
+
+        get actionBar() {
+            return this._actionBar
+        }
+
+        get content() {
+            return this._content
+        }
+
+        get nextBtn() {
+            return this._nextBtn
+        }
+
+        get backBtn() {
+            return this._backBtn
+        }
+
+        initialize() {
+            this._actionBar.textContent = ''
+            this._content.textContent = ''
+
+            const div = this._actionBar.appendChild(document.createElement('div'))
+            div.className = 'action-bar-floater'
+
+            this._backBtn = div.appendChild(document.createElement('button'))
+            this._backBtn.textContent = 'Back'
+            this._backBtn.addEventListener('click', () => {
+                switchPage(-1, false)
+            })
+
+            this._nextBtn = div.appendChild(document.createElement('button'))
+            this._nextBtn.textContent = 'Next'
+            this._nextBtn.addEventListener('click', () => {
+                switchPage(1, this._updated)
+                this._updated = false
+            })
+
+            this._updated = true
+        }
+    }
+
+    class UploadTransactionReportPage extends Page {
+        constructor() {
+            super('Upload Transaction Report')
+        }
+
+        initialize() {
+            super.initialize()
+
+            this.nextBtn.disabled = true
+            this.backBtn.disabled = true
+
+            const button = this.actionBar.appendChild(document.createElement('button'))
+            button.textContent = 'Upload'
+            button.addEventListener('click', () => {
+                this.upload()
+            })
+
+            const span = this.actionBar.appendChild(document.createElement('span'))
+            this._filename = span
+        }
+
+        async upload() {
+            const file = await uploadFile()
+            if (!file) {
+                return
+            }
+
+            this._filename.textContent = file.name
+
+            const transactionReport = await CommaSeparatedValues.fromFile(file)
+
+            $_GLOBALS['transactionReport'] = transactionReport
+                .where('Status', status => status !== 'rejected')
+                .where('Amount Approved', amount => +amount !== 0)
+
+            $_GLOBALS['eligibleItems'] = null
+            $_GLOBALS['revisedValues'] = null
+            $_GLOBALS['payCodeRules'] = null
+            $_GLOBALS['reportColumns'] = null
+
+            this._updated = true
+            this.nextBtn.disabled = false
+        }
+    }
+
+    class SpecifyEligibleItemsPage extends Page {
+        constructor() {
+            super('Specify Eligible Items')
+        }
+
+        initialize() {
+            super.initialize()
+
+            this.nextBtn.disabled = true
+
+            const button = this.actionBar.appendChild(document.createElement('button'))
+            button.textContent = 'Upload'
+            button.addEventListener('click', () => {
+                this.upload()
+            })
+
+            const span = this.actionBar.appendChild(document.createElement('span'))
+            this._filename = span
+        }
+
+        async upload() {
+            const file = await uploadFile()
+            if (!file) {
+                return
+            }
+
+            this._filename.textContent = file.name
+
+            const csv = await CommaSeparatedValues.fromFile(file)
+            const eligibleItems = csv.values.reduce((items, value) => {
+                const category = value[1]
+                const subcategory = value[2]
+                for (let i = 6; i < value.length; ++i) {
+                    if (value[i].toUpperCase() !== 'Y') {
+                        continue
+                    }
+
+                    const wallet = csv.header[i]
+                    items[wallet] = items[wallet] ?? {}
+                    items[wallet][category] = items[wallet][category] ?? {}
+                    items[wallet][category][subcategory] = true
+                }
+                return items
+            }, {})
+
+            $_GLOBALS['eligibleItems'] = eligibleItems
+            $_GLOBALS['predefinedWallets'] = Object.keys(eligibleItems).sort()
+            $_GLOBALS['predefinedCategories'] = Object.values(eligibleItems).map(cat => Object.keys(cat)).flat().distinct().sort()
+            $_GLOBALS['predefinedSubcategories'] = Object.values(eligibleItems).map(cat => Object.values(cat).map(subcat => Object.keys(subcat))).flat(2).distinct().sort()
+            $_GLOBALS['companyName'] = csv[1][0]
+
+            $_GLOBALS['revisedValues'] = null
+            $_GLOBALS['payCodeRules'] = null
+            $_GLOBALS['reportColumns'] = null
+
+            this._updated = true
+            this.nextBtn.disabled = false
+        }
+    }
+
+    class ReviseValuesPage extends Page {
+        constructor() {
+            super('Revise Values')
+        }
+
+        initialize() {
+            super.initialize()
+
+            this.nextBtn.addEventListener('click', () => {
+                this.saveValues()
+            }, true)
+
+            const importBtn = this.actionBar.appendChild(document.createElement('button'))
+            importBtn.textContent = 'Import'
+            importBtn.disabled = true
+
+            const exportBtn = this.actionBar.appendChild(document.createElement('button'))
+            exportBtn.textContent = 'Export'
+            exportBtn.disabled = true
+
+            this._tabView = new TabView()
+
+            const valueIndices = {
+                'Wallet': 'predefinedWallets',
+                'Category': 'predefinedCategories',
+                'Subcategory': 'predefinedSubcategories',
+            }
+
+            Object.keys(valueIndices).forEach(key => {
+                this._tabView.add(key, this.collectValues(key, valueIndices[key]))
+            })
+
+            this.content.appendChild(this._tabView.dom)
+        }
+
+        collectValues(actualValuesColumnName, expectedValuesKey) {
+            const actualValues = $_GLOBALS['transactionReport'].select(actualValuesColumnName).values.distinct()
+            const expectedValues = $_GLOBALS[expectedValuesKey]
+            const revisionBoxes = actualValues.map(actualValue => {
+                const box = document.createElement('div')
+                box.className = 'revision-box'
+
+                const p1 = box.appendChild(document.createElement('p'))
+                p1.className = 'revision-box-actual-value'
+                p1.title = actualValue
+                if (actualValue) {
+                    p1.textContent = actualValue
+                } else {
+                    p1.textContent = 'empty string'
+                    p1.classList.add('empty')
+                }
+
+                const p2 = box.appendChild(document.createElement('p'))
+                const select = p2.appendChild(document.createElement('select'))
+                const defaultOption = select.appendChild(document.createElement('option'))
+                defaultOption.value = actualValue
+                defaultOption.textContent = '(Keep value)'
+
+                let minDistance = Number.MAX_VALUE
+                let minDistanceIndex = -1
+                expectedValues.forEach((expectedValue, i) => {
+                    const option = select.appendChild(document.createElement('option'))
+                    option.value = expectedValue
+                    option.textContent = expectedValue
+
+                    const distance = actualValue.distance(expectedValue)
+                    if (distance < minDistance) {
+                        minDistance = distance
+                        minDistanceIndex = i
+                    }
+                })
+
+                const trustLevel = this.trustLevels(minDistance)
+
+                box.setAttribute('min-distance', minDistance)
+                box.setAttribute('trust-level', trustLevel)
+
+                // keep value by default if there is no predefined value similar enough
+                const selection = (trustLevel >= 3) ? 0 : (minDistanceIndex + 1)
+                select.children[selection].selected = true
+
+                select.addEventListener('change', () => {
+                    $_GLOBALS['revisedValues'] = null
+                    this._updated = true
+                })
+
+                return box
+            })
+
+            revisionBoxes.sort((lhs, rhs) => +rhs.getAttribute('min-distance') - +lhs.getAttribute('min-distance'))
+
+            const div = revisionBoxes.reduce((d, box) => d.appendChild(box).parentElement, document.createElement('div'))
+            div.title = actualValuesColumnName
+
+            if (!(+revisionBoxes[0]?.getAttribute('min-distance') > 0)) {
+                div.className = 'no-revision-box'
+                div.append('All good :)')
+            }
+
+            return div
+        }
+
+        // heuristic values, need verification
+        trustLevels(dist) {
+            if (dist === 0) {
+                return 0
+            }
+
+            if (dist <= 6) {
+                return 1
+            }
+
+            if (dist <= 12) {
+                return 2
+            }
+
+            return 3
+        }
+
+        saveValues() {
+            const values = [...this._tabView.body.children]
+                .map(content => [...content.querySelectorAll('.revision-box')].map(box => {
+                    return {
+                        key: box.children[0].title,
+                        value: box.children[1].querySelector('select').value,
+                        source: content.title,
+                        customized: box.children[1].querySelector('select').children[0].selected,
+                    }
+                }))
+                .flat()
+
+            $_GLOBALS['revisedValues'] = values.reduce((dict, x) => { dict[x.key] = x.value; return dict }, {})
+            $_GLOBALS['customizedWallets'] = values.filter(x => x.customized && x.source === 'Wallet').map(x => x.key).sort()
+            $_GLOBALS['customizedCategories'] = values.filter(x => x.customized && x.source === 'Category').map(x => x.key).sort()
+            $_GLOBALS['customizedSubcategories'] = values.filter(x => x.customized && x.source === 'Subcategory').map(x => x.key).sort()
+
+            $_GLOBALS['payCodeRules'] = null
+            $_GLOBALS['reportColumns'] = null
+        }
+    }
+
+    class ConfigurePayCodeRulesPage extends Page {
+        constructor() {
+            super('Configure Pay Code Rules')
+        }
+
+        initialize() {
+            super.initialize()
+
+            this.nextBtn.addEventListener('click', () => {
+                $_GLOBALS['payCodeRules'] = this.getRules()
+            }, true)
+
+            const addBtn = this.actionBar.appendChild(document.createElement('button'))
+            addBtn.textContent = 'Add'
+            addBtn.addEventListener('click', () => {
+                this.addRule()
+            })
+
+            const removeBtn = this.actionBar.appendChild(document.createElement('button'))
+            removeBtn.textContent = 'Remove'
+            removeBtn.addEventListener('click', () => {
+                this.removeRule()
+            })
+
+            const importBtn = this.actionBar.appendChild(document.createElement('button'))
+            importBtn.textContent = 'Import'
+            importBtn.addEventListener('click', () => {
+                this.import()
+            })
+
+            const exportBtn = this.actionBar.appendChild(document.createElement('button'))
+            exportBtn.textContent = 'Export'
+            exportBtn.addEventListener('click', () => {
+                this.export()
+            })
+
+            this._preview = this.content.appendChild(document.createElement('div'))
+            this._preview.className = 'pay-code-rule-config-preview'
+
+            this._config = this.content.appendChild(this.createConfigurations())
+        }
+
+        createConfigurations() {
+            const div = document.createElement('div')
+            div.className = 'pay-code-rule-config'
+
+            const p = div.appendChild(document.createElement('p'))
+
+            const textInput = p.appendChild(document.createElement('input'))
+            textInput.id = `text-${uuidv4()}`
+            textInput.type = 'text'
+
+            const label = p.insertBefore(document.createElement('label'), textInput)
+            label.setAttribute('for', textInput.id)
+            label.textContent = 'Code'
+
+            const columns = [
+                this.getColumnFromTransactionReport(['Members Country', 'Country'], x => x),
+                this.getTransactionTypeColumn(),
+                this.getColumnFromTransactionReport('Wallet', x => $_GLOBALS['revisedValues'][x], group => this.onWalletChange()),
+                this.getColumnFromTransactionReport('Category', x => $_GLOBALS['revisedValues'][x], group => this.onCategoryChange()),
+                this.getColumnFromTransactionReport('Subcategory', x => $_GLOBALS['revisedValues'][x]),
+            ]
+
+            const table = div.appendChild(document.createElement('table'))
+
+            const thead = table.appendChild(document.createElement('thead')).appendChild(document.createElement('tr'))
+            const tbody = table.appendChild(document.createElement('tbody')).appendChild(document.createElement('tr'))
+            columns.forEach(column => {
+                thead.appendChild(column.th)
+                tbody.appendChild(column.td)
+            })
+
+            this._walletColumn = tbody.children[2]
+            this._categoryColumn = tbody.children[3]
+            this._subcategoryColumn = tbody.children[4]
+
+            return div
+        }
+
+        getTransactionTypeColumn() {
+            const th = document.createElement('th')
+
+            const checkbox = th.appendChild(document.createElement('input'))
+            checkbox.id = `checkbox-${uuidv4()}`
+            checkbox.type = 'checkbox'
+
+            const label = th.appendChild(document.createElement('label'))
+            label.setAttribute('for', checkbox.id)
+            label.textContent = 'Transaction Type'
+
+            const checkboxGroup = new CheckboxGroup({
+                checkboxClass: 'pay-code-rule-config-checkbox',
+                labelClass: 'pay-code-rule-config-label',
+                checked: true,
+            })
+            checkboxGroup.add('Claim')
+            checkboxGroup.add('Payment')
+
+            const td = checkboxGroup.appendTo(document.createElement('td'))
+
+            return {th, td}
+        }
+
+        getColumnFromTransactionReport(columnName, transform, listener) {
+            const csv = $_GLOBALS['transactionReport'].select(columnName)
+
+            const th = document.createElement('th')
+
+            const checkbox = th.appendChild(document.createElement('input'))
+            checkbox.id = `checkbox-${uuidv4()}`
+            checkbox.type = 'checkbox'
+
+            const label = th.appendChild(document.createElement('label'))
+            label.setAttribute('for', checkbox.id)
+            label.textContent = csv.header[0]
+
+            const checkboxGroup = csv.values.map(transform).distinct().sort().reduce(
+                (group, value) => {
+                    group.add(value)
+                    return group
+                },
+                new CheckboxGroup({
+                    checkboxClass: 'pay-code-rule-config-checkbox',
+                    labelClass: 'pay-code-rule-config-label',
+                    checked: true,
+                    listener,
+                }))
+
+            const td = checkboxGroup.appendTo(document.createElement('td'))
+
+            return {th, td}
+        }
+
+        onWalletChange() {
+            const selectedWallets = [...this._walletColumn.querySelectorAll('input[type=checkbox]:checked:not(:disabled) + label')]
+                .filter(label => label !== this._walletColumn.children[1]) // select all
+                .map(label => label.textContent)
+                .map(wallet => {
+                    return {
+                        category: Object.keys($_GLOBALS['eligibleItems'][wallet]),
+                        subcategory: Object.values($_GLOBALS['eligibleItems'][wallet]).map(dict => Object.keys(dict))
+                    }
+                })
+                
+            const selectedCategories = selectedWallets
+                .map(x => x.category)
+                .flat()
+                .concat(...$_GLOBALS['customizedCategories'])
+                .toDictionary(category => category, _ => true)
+            this.updateColumn(this._categoryColumn, selectedCategories, group => this.onCategoryChange(i))
+
+            const selectedSubcategories = selectedWallets
+                .map(x => x.subcategory)
+                .flat(2)
+                .concat(...$_GLOBALS['customizedSubcategories'])
+                .toDictionary(subcategory => subcategory, _ => true)
+            this.updateColumn(this._subcategoryColumn, selectedSubcategories)
+        }
+
+        onCategoryChange() {
+            const selectedWallets = [...this._walletColumn.querySelectorAll('input[type=checkbox]:checked:not(:disabled) + label')]
+                .filter(label => label !== this._walletColumn.children[1]) // select all
+                .map(label => label.textContent)
+
+            const selectedCategories = [...this._categoryColumn.querySelectorAll('input[type=checkbox]:checked:not(:disabled) + label')]
+                .filter(label => label !== this._categoryColumn.children[1]) // select all
+                .map(label => label.textContent)
+
+            const selectedSubcategories = selectedWallets
+                .map(wallet => {
+                    return Object.keys($_GLOBALS['eligibleItems'][wallet])
+                        .filter(category => selectedCategories.indexOf(category) !== -1)
+                        .map(category => Object.keys($_GLOBALS['eligibleItems'][wallet][category]))
+                })
+                .flat(2)
+                .concat(...$_GLOBALS['customizedSubcategories'])
+                .toDictionary(subcategory => subcategory, _ => true)
+
+            this.updateColumn(this._subcategoryColumn, selectedSubcategories)
+        }
+
+        updateColumn(td, values, listener) {
+            td.querySelectorAll('label').forEach(label => {
+                const checkbox = label.previousElementSibling
+                checkbox.checked = true
+                checkbox.disabled = (checkbox !== td.firstElementChild) && !(label.textContent in values) // select all is never disabled
+            })
+        }
+
+        addRule() {
+            const currentTab = this._config
+
+            const code = currentTab.querySelector('input[type=text]')
+            if (!code.value) {
+                code.focus()
+                return
+            }
+
+            const head = currentTab.querySelector('thead > tr')
+            const body = currentTab.querySelector('tbody > tr')
+            const config = ['country', 'transactionType', 'wallet', 'category', 'subcategory']
+                .map((configName, i) => ({
+                    key: configName,
+                    value: {
+                        neg: head.children[i].querySelector('input[type=checkbox]').checked,
+                        values: this.readConfig(body.children[i]),
+                    },
+                }))
+                .toDictionary(x => x.key, x => x.value)
+            if (Object.values(config).any(value => value.values == null)) {
+                // TODO
+                return
+            }
+
+            config.code = code
+
+            this.appendRulePreview(config)
+        }
+
+        appendRulePreview(config) {
+            const top = [...this._preview.children].reduce((top, p) => top + p.offsetHeight + 8, 0)
+
+            const p = this._preview.appendChild(document.createElement('p'))
+            p.textContent = JSON.stringify(config)
+            p.style.left = '-100%'
+            p.style.top = `${top}px`
+            p.addEventListener('click', () => {
+                [...this._preview.children].forEach(p => p.classList.remove('selected'))
+                p.classList.add('selected')
+                this.setConfig(JSON.parse(p.textContent))
+            })
+
+            setTimeout(() => {
+                p.style.left = '0'
+            }, 100);
+        }
+
+        readConfig(td) {
+            const labels = [...td.querySelectorAll('input[type=checkbox]:checked:not(:disabled) + label')]
+            if (labels.length === 0) {
+                return null
+            }
+
+            if (labels[0] === td.children[1]) { // select all
+                if (labels.length === 1) { // only 1 select all option, also empty
+                    return null
+                }
+
+                return '*'
+            }
+
+            return labels.map(label => label.textContent)
+        }
+
+        async import() {
+            const file = await uploadFile()
+            if (!file) {
+                return
+            }
+
+            const json = await readTextFile(file)
+            const configs = JSON.parse(json)
+
+            this._preview.textContent = ''
+            for (const config of configs) {
+                this.appendRulePreview(config)
+                await sleep(100)
+            }
+        }
+
+        removeRule() {
+            const p = this._preview.querySelector('.selected')
+            if (!p) {
+                return
+            }
+
+            const h = p.offsetHeight + 8
+            p.style.left = '-100%'
+            p.style.opacity = '0'
+            setTimeout(async () => {
+                for (let i = p.nextElementSibling; i; i = i.nextElementSibling) {
+                    i.style.top = `${i.offsetTop - h}px`
+                    await sleep(100)
+                }
+            }, 100)
+            setTimeout(() => {
+                p.remove()
+            }, 300)
+        }
+
+        getRules() {
+            return [...this._preview.children].map(p => JSON.parse(p.textContent))
+        }
+
+        export() {
+            const json = this.getRules()
+            downloadFile('application/json', `${$_GLOBALS['companyName']}-pay-code-rules.json`, JSON.stringify(json))
+        }
+
+        setConfig(config) {
+            this._config.querySelector('input[type=text]').value = config.code
+
+            const head = this._config.querySelector('thead > tr')
+            const body = this._config.querySelector('tbody > tr')
+            ;['country', 'transactionType', 'wallet', 'category', 'subcategory'].forEach((column, i) => {
+                head.children[i].querySelector('input[type=checkbox]').checked = config[column].neg
+                ;[...body.children[i].querySelectorAll('input[type=checkbox]')].forEach(checkbox => {
+                    checkbox.checked = (config[column].values === '*') || (config[column].values.indexOf(checkbox.nextElementSibling.textContent) !== -1)
+                })
+
+                if (column === 'wallet') {
+                    this.onWalletChange()
+                } else if (column === 'category') {
+                    this.onCategoryChange()
+                }
+            })
+        }
+    }
+
+    class SelectReportColumnsPage extends Page {
+        constructor() {
+            super('Select Report Columns')
+        }
+
+        initialize() {
+            super.initialize()
+
+            this.nextBtn.addEventListener('click', () => {
+                $_GLOBALS['reportColumns'] = this.getSelectedColumns()
+            }, true)
+
+            const importBtn = this.actionBar.appendChild(document.createElement('button'))
+            importBtn.textContent = 'Import'
+            importBtn.addEventListener('click', () => {
+                this.import()
+            })
+
+            const exportBtn = this.actionBar.appendChild(document.createElement('button'))
+            exportBtn.textContent = 'Export'
+            exportBtn.addEventListener('click', () => {
+                this.export()
+            })
+
+            this._availableColumns = this.content.appendChild(document.createElement('div'))
+            this._availableColumns.className = 'available-columns'
+            $_GLOBALS['transactionReport'].header.forEach(columnName => {
+                const checkbox = this._availableColumns.appendChild(document.createElement('input'))
+                checkbox.id = `checkbox-${uuidv4()}`
+                checkbox.type = 'checkbox'
+                checkbox.addEventListener('change', () => {
+                    this.selectColumn(checkbox)
+                })
+
+                const label = this._availableColumns.appendChild(document.createElement('label'))
+                label.setAttribute('for', checkbox.id)
+                label.textContent = columnName
+            })
+
+            this._selectedColumns = this.content.appendChild(document.createElement('div'))
+            this._selectedColumns.className = 'selected-columns'
+
+            // default pay code column
+            this._selectedColumns.appendChild(this.createPayCodeColumnSelection())
+        }
+
+        createBasicColumnSelection(columnName, columnIndex, id) {
+            const p = this._selectedColumns.appendChild(document.createElement('p'))
+
+            const text = p.appendChild(document.createElement('input'))
+            text.id = id
+            text.type = 'text'
+            text.value = columnName
+            text.title = columnName
+            text.setAttribute('column-index', `${columnIndex}`)
+
+            const select = p.appendChild(document.createElement('select'))
+
+            const up = p.appendChild(document.createElement('a'))
+            up.textContent = 'Up'
+            up.href = '#'
+            up.addEventListener('click', e => {
+                e.preventDefault()
+                if (p.previousElementSibling) {
+                    p.parentElement.insertBefore(p, p.previousElementSibling)
+                }
+            })
+
+            const down = p.appendChild(document.createElement('a'))
+            down.textContent = 'Down'
+            down.href = '#'
+            down.addEventListener('click', e => {
+                e.preventDefault()
+                if (p.nextElementSibling) {
+                    p.parentElement.insertBefore(p, p.nextElementSibling.nextElementSibling)
+                }
+            })
+
+            return p
+        }
+
+        createPayCodeColumnSelection() {
+            const p = this.createBasicColumnSelection('Pay Code', -1)
+            const select = p.querySelector('select')
+            const option = select.appendChild(document.createElement('option'))
+            option.value = '2'
+            option.textContent = 'Group'
+            return p
+        }
+
+        selectColumn(checkbox) {
+            const id = `${checkbox.id}-checked`
+
+            if (!checkbox.checked) {
+                return document.getElementById(id).parentElement.remove()
+            }
+
+            const columnName = checkbox.nextElementSibling.textContent
+            const columnIndex = $_GLOBALS['transactionReport'].columnIndex(columnName)
+
+            const p = this.createBasicColumnSelection(columnName, columnIndex, id)
+
+            const select = p.querySelector('select')
+
+            const option1 = select.appendChild(document.createElement('option'))
+            option1.value = '1'
+            option1.textContent = '-'
+
+            const option2 = select.appendChild(document.createElement('option'))
+            option2.value = '2'
+            option2.textContent = 'Group'
+
+            const option3 = select.appendChild(document.createElement('option'))
+            option3.value = '3'
+            option3.textContent = 'Sum'
+
+            const remove = p.appendChild(document.createElement('a'))
+            remove.textContent = 'Remove'
+            remove.href = '#'
+            remove.addEventListener('click', e => {
+                e.preventDefault()
+                p.remove()
+                checkbox.checked = false
+            })
+
+            return p
+        }
+
+        getSelectedColumns() {
+            return [...this._selectedColumns.querySelectorAll('input[type=text]')].map(text => ({
+                name: text.value,
+                columnName: text.title,
+                columnIndex: +text.getAttribute('column-index'),
+                type: +text.nextElementSibling.value,
+            }))
+        }
+
+        export() {
+            const json = this.getSelectedColumns()
+            downloadFile('application/json', `${$_GLOBALS['companyName']}-report-template.json`, JSON.stringify(json))
+        }
+
+        async import() {
+            const file = await uploadFile()
+            if (!file) {
+                return
+            }
+
+            this._selectedColumns.textContent = ''
+
+            const json = await readTextFile(file)
+
+            JSON.parse(json).forEach(selectedColumn => {
+                if (selectedColumn.columnIndex === -1) {
+                    const p = this.createPayCodeColumnSelection()
+                    p.querySelector('input[type=text]').value = selectedColumn.name
+                    return
+                }
+
+                const labels = [...this._availableColumns.querySelectorAll('label')]
+                const i = labels.map(label => label.textContent).indexOf(selectedColumn.columnName)
+                if (i === -1) {
+                    // TODO schema of transaction report changed
+                    console.error(selectedColumn)
+                    return
+                }
+
+                const checkbox = labels[i].previousElementSibling
+                checkbox.checked = true
+
+                const text = this.selectColumn(checkbox).querySelector('input[type=text]')
+                text.value = selectedColumn.name
+
+                const select = text.nextElementSibling
+                select.value = `${selectedColumn.type}`
+
+                // verify
+                if (selectedColumn.columnIndex !== +text.getAttribute('column-index')) {
+                    // TODO schema of transaction report changed
+                    console.warn(selectedColumn)
+                }
+            })
+        }
+    }
+
+    class DownloadReportPage extends Page {
+        constructor() {
+            super('Download Report')
+        }
+
+        initialize() {
+            super.initialize()
+
+            this.nextBtn.disabled = true
+
+            const downloadBtn = this.actionBar.appendChild(document.createElement('button'))
+            downloadBtn.textContent = 'Download'
+            downloadBtn.addEventListener('click', () => {
+                this.download()
+            })
+
+            const restartBtn = this.actionBar.appendChild(document.createElement('button'))
+            restartBtn.textContent = 'Restart'
+            restartBtn.addEventListener('click', () => {
+                this.restart()
+            })
+        }
+
+        download() {
+            const header = $_GLOBALS['reportColumns'].map(column => column.name)
+
+            let values = $_GLOBALS['transactionReport'].values
+                .map(row => $_GLOBALS['reportColumns']
+                    .map(column => column.columnIndex)
+                    .map(i => {
+                        if (i === -1) { // pay code
+                            return this.computePayCode(row)
+                        }
+
+                        return row[i]
+                    }))
+
+            const payCodeIndex = $_GLOBALS['reportColumns'].findIndex(column => column.columnIndex === -1)
+            values = values.filter(row => row[payCodeIndex] !== '')
+
+            const groupByColumns = $_GLOBALS['reportColumns'].filter(column => column.type === 2).map(column => column.name)
+            values = new CommaSeparatedValues(header, ...values).groupBy(...groupByColumns)
+
+            const sumOfColumns = $_GLOBALS['reportColumns'].filter(column => column.type === 3).map(column => column.name)
+            values = values
+                .map(group => group.sum(...sumOfColumns))
+                .map(csv => sumOfColumns.reduce((csv, columnName) => csv.where(columnName, value => value !== 0), csv))
+
+            const report = new CommaSeparatedValues(header, ...values.map(csv => csv.values).flat())
+            downloadFile('text/csv', `${$_GLOBALS['companyName']}-report.csv`, report.map(line => line.join(',')).join('\n'))
+        }
+
+        computePayCode(transaction) {
+            return $_GLOBALS['payCodeRules'].find(rule => {
+                const info = {
+                    country: transaction[$_GLOBALS['transactionReport'].columnIndex(['Members Country', 'Country'])],
+                    transactionType: this.statusToTransactionType(transaction[$_GLOBALS['transactionReport'].columnIndex('Status')]),
+                    wallet: $_GLOBALS['revisedValues'][transaction[$_GLOBALS['transactionReport'].columnIndex('Wallet')]],
+                    category: $_GLOBALS['revisedValues'][transaction[$_GLOBALS['transactionReport'].columnIndex('Category')]],
+                    subcategory: $_GLOBALS['revisedValues'][transaction[$_GLOBALS['transactionReport'].columnIndex('Subcategory')]],
+                }
+
+                return Object.keys(info).all(key => {
+                    return rule[key].neg !== ((rule[key].values === '*') || (rule[key].values.indexOf(info[key]) !== -1))
+                })
+            })?.code ?? ''
+        }
+
+        statusToTransactionType(status) {
+            switch (status) {
+                case 'approved': return 'Claim'
+                case 'Payment': return "Payment"
+                default: throw new Error(`Invalid status: ${status}`)
+            }
+        }
+
+        restart() {
+            $_GLOBALS['currentPage'] = 0
+            switchPage(0, true)
+        }
+    }
+
+    $_GLOBALS['pages'] = [
+        new UploadTransactionReportPage(),
+        new SpecifyEligibleItemsPage(),
+        new ReviseValuesPage(),
+        new ConfigurePayCodeRulesPage(),
+        new SelectReportColumnsPage(),
+        new DownloadReportPage(),
+    ]
+    $_GLOBALS['currentPage'] = 0
+    switchPage(0, true)
+
+    document.body.append(...$_GLOBALS['pages'].map(page => page.dom))
+})
+</script>
