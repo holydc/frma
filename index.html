@@ -99,6 +99,14 @@ input[type=checkbox]:disabled + label {
     display: none;
 }
 
+input[type=checkbox] + label.empty {
+    font-style: italic;
+}
+
+input[type=checkbox]:checked + label.empty {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 input[type=text] {
     background-color: transparent;
     border-bottom: 1px solid var(--frma-blue);
@@ -391,58 +399,58 @@ input[type=text]:focus-visible {
 }
 </style>
 <script>
+Array.iota = n => {
+    const a = new Array(n)
+    for (let i = 0; i < n; ++i) {
+        a[i] = i
+    }
+    return a
+}
+
+Array.prototype.all = function (predicate) {
+    return this.reduce((all, element) => all && predicate(element), true)
+}
+
+Array.prototype.any = function (predicate) {
+    return this.reduce((any, element) => any || predicate(element), false)
+}
+
+Array.prototype.toDictionary = function (keySelector, valueSelector) {
+    return this.reduce((dictionary, element) => {
+        dictionary[keySelector(element)] = valueSelector(element)
+        return dictionary
+    }, {})
+}
+
+Array.prototype.distinct = function () {
+    return Object.keys(this.toDictionary(x => x, x => true))
+}
+
+String.prototype.distance = function (other) {
+    // case insensitive
+    const l = this.toUpperCase()
+    const r = other.toUpperCase()
+
+    let dp = Array.iota(r.length + 1)
+    for (let i = 0; i < l.length; ++i) {
+        let dp2 = new Array(r.length + 1)
+        dp2[0] = i + 1
+        for (let j = 0; j < r.length; ++j) {
+            if (l[i] === r[j]) {
+                dp2[j + 1] = dp[j]
+            } else {
+                dp2[j + 1] = Math.min(dp[j + 1], dp2[j]) + 1
+            }
+        }
+        dp = dp2
+    }
+
+    return dp[r.length]
+}
+
 const $_GLOBALS = {}
 
 document.addEventListener('DOMContentLoaded', () => {
-    Array.iota = n => {
-        const a = new Array(n)
-        for (let i = 0; i < n; ++i) {
-            a[i] = i
-        }
-        return a
-    }
-
-    Array.prototype.all = function (predicate) {
-        return this.reduce((all, element) => all && predicate(element), true)
-    }
-
-    Array.prototype.any = function (predicate) {
-        return this.reduce((any, element) => any || predicate(element), false)
-    }
-
-    Array.prototype.toDictionary = function (keySelector, valueSelector) {
-        return this.reduce((dictionary, element) => {
-            dictionary[keySelector(element)] = valueSelector(element)
-            return dictionary
-        }, {})
-    }
-
-    Array.prototype.distinct = function () {
-        return Object.keys(this.toDictionary(x => x, x => true))
-    }
-
-    String.prototype.distance = function (other) {
-        // case insensitive
-        const l = this.toUpperCase()
-        const r = other.toUpperCase()
-
-        let dp = Array.iota(r.length + 1)
-        for (let i = 0; i < l.length; ++i) {
-            let dp2 = new Array(r.length + 1)
-            dp2[0] = i + 1
-            for (let j = 0; j < r.length; ++j) {
-                if (l[i] === r[j]) {
-                    dp2[j + 1] = dp[j]
-                } else {
-                    dp2[j + 1] = Math.min(dp[j + 1], dp2[j]) + 1
-                }
-            }
-            dp = dp2
-        }
-
-        return dp[r.length]
-    }
-
     const uuidv4 = () => {
         // don't use crypto.randomUUID even if it's available
         // code is from https://stackoverflow.com/a/2117523
@@ -768,10 +776,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const label = document.createElement('label')
             label.textContent = labelText
+            label.title = labelText
             label.setAttribute('for', id)
 
             if (this._cfg.labelClass != null) {
                 label.className = this._cfg.labelClass
+            }
+
+            if (!labelText) {
+                label.classList.add('empty')
+                label.textContent = 'empty string'
             }
 
             this._checkboxes.push(checkbox)
@@ -1160,11 +1174,11 @@ document.addEventListener('DOMContentLoaded', () => {
             label.textContent = 'Code'
 
             const columns = [
-                this.getColumnFromTransactionReport(['Members Country', 'Country'], x => x),
+                this.getColumnFromTransactionReport(['Members Country', 'Country']),
                 this.getTransactionTypeColumn(),
-                this.getColumnFromTransactionReport('Wallet', x => $_GLOBALS['revisedValues'][x], group => this.onWalletChange()),
-                this.getColumnFromTransactionReport('Category', x => $_GLOBALS['revisedValues'][x], group => this.onCategoryChange()),
-                this.getColumnFromTransactionReport('Subcategory', x => $_GLOBALS['revisedValues'][x]),
+                this.getColumnFromPredefinedAndCustomizedValues('Wallet', 'predefinedWallets', 'customizedWallets', group => this.onWalletChange()),
+                this.getColumnFromPredefinedAndCustomizedValues('Category', 'predefinedCategories', 'customizedCategories', group => this.onCategoryChange()),
+                this.getColumnFromPredefinedAndCustomizedValues('Subcategory', 'predefinedSubcategories', 'customizedSubcategories'),
             ]
 
             const table = div.appendChild(document.createElement('table'))
@@ -1204,10 +1218,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const td = checkboxGroup.appendTo(document.createElement('td'))
 
-            return {th, td}
+            return { th, td }
         }
 
         getColumnFromTransactionReport(columnName, transform, listener) {
+            transform ??= x => x
+
             const csv = $_GLOBALS['transactionReport'].select(columnName)
 
             const th = document.createElement('th')
@@ -1234,62 +1250,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const td = checkboxGroup.appendTo(document.createElement('td'))
 
-            return {th, td}
+            return { th, td }
+        }
+
+        getColumnFromPredefinedAndCustomizedValues(columnName, predefinedColumnName, customizedColumnName, listener) {
+            const th = document.createElement('th')
+
+            const checkbox = th.appendChild(document.createElement('input'))
+            checkbox.id = `checkbox-${uuidv4()}`
+            checkbox.type = 'checkbox'
+
+            const label = th.appendChild(document.createElement('label'))
+            label.setAttribute('for', checkbox.id)
+            label.textContent = columnName
+
+            const checkboxGroup = $_GLOBALS[predefinedColumnName].concat($_GLOBALS[customizedColumnName]).sort().reduce(
+                (group, value) => {
+                    group.add(value)
+                    return group
+                },
+                new CheckboxGroup({
+                    checkboxClass: 'pay-code-rule-config-checkbox',
+                    labelClass: 'pay-code-rule-config-label',
+                    checked: true,
+                    listener,
+                })
+            )
+
+            const td = checkboxGroup.appendTo(document.createElement('td'))
+
+            return { th, td }
         }
 
         onWalletChange() {
             const selectedWallets = [...this._walletColumn.querySelectorAll('input[type=checkbox]:checked:not(:disabled) + label')]
                 .filter(label => label !== this._walletColumn.children[1]) // select all
-                .map(label => label.textContent)
-                .map(wallet => {
-                    return {
-                        category: Object.keys($_GLOBALS['eligibleItems'][wallet]),
-                        subcategory: Object.values($_GLOBALS['eligibleItems'][wallet]).map(dict => Object.keys(dict))
-                    }
-                })
-                
-            const selectedCategories = selectedWallets
-                .map(x => x.category)
-                .flat()
-                .concat(...$_GLOBALS['customizedCategories'])
-                .toDictionary(category => category, _ => true)
-            this.updateColumn(this._categoryColumn, selectedCategories, group => this.onCategoryChange(i))
+                .map(label => label.title)
+                .toDictionary(wallet => wallet, wallet => true)
 
-            const selectedSubcategories = selectedWallets
-                .map(x => x.subcategory)
-                .flat(2)
-                .concat(...$_GLOBALS['customizedSubcategories'])
-                .toDictionary(subcategory => subcategory, _ => true)
-            this.updateColumn(this._subcategoryColumn, selectedSubcategories)
+            const selectedCategories = Object.keys($_GLOBALS['eligibleItems'])
+                .filter(wallet => wallet in selectedWallets)
+                .map(wallet => Object.keys($_GLOBALS['eligibleItems'][wallet]))
+                .flat()
+                .concat($_GLOBALS['customizedCategories'])
+                .toDictionary(category => category, category => true)
+            this.updateColumn(this._categoryColumn, selectedCategories)
+            this.onCategoryChange()
         }
 
         onCategoryChange() {
             const selectedWallets = [...this._walletColumn.querySelectorAll('input[type=checkbox]:checked:not(:disabled) + label')]
                 .filter(label => label !== this._walletColumn.children[1]) // select all
-                .map(label => label.textContent)
+                .map(label => label.title)
+                .toDictionary(wallet => wallet, wallet => true)
 
             const selectedCategories = [...this._categoryColumn.querySelectorAll('input[type=checkbox]:checked:not(:disabled) + label')]
                 .filter(label => label !== this._categoryColumn.children[1]) // select all
-                .map(label => label.textContent)
+                .map(label => label.title)
+                .toDictionary(category => category, category => true)
 
-            const selectedSubcategories = selectedWallets
-                .map(wallet => {
-                    return Object.keys($_GLOBALS['eligibleItems'][wallet])
-                        .filter(category => selectedCategories.indexOf(category) !== -1)
-                        .map(category => Object.keys($_GLOBALS['eligibleItems'][wallet][category]))
-                })
+            const selectedSubcategories = Object.keys($_GLOBALS['eligibleItems'])
+                .filter(wallet => wallet in selectedWallets)
+                .map(wallet => Object.keys($_GLOBALS['eligibleItems'][wallet])
+                    .filter(category => category in selectedCategories)
+                    .map(category => Object.keys($_GLOBALS['eligibleItems'][wallet][category])))
                 .flat(2)
-                .concat(...$_GLOBALS['customizedSubcategories'])
-                .toDictionary(subcategory => subcategory, _ => true)
-
+                .concat($_GLOBALS['customizedSubcategories'])
+                .toDictionary(subcategory => subcategory, subcategory => true)
             this.updateColumn(this._subcategoryColumn, selectedSubcategories)
         }
 
-        updateColumn(td, values, listener) {
+        updateColumn(td, values) {
             td.querySelectorAll('label').forEach(label => {
                 const checkbox = label.previousElementSibling
                 checkbox.checked = true
-                checkbox.disabled = (checkbox !== td.firstElementChild) && !(label.textContent in values) // select all is never disabled
+                checkbox.disabled = (checkbox !== td.firstElementChild) && !(label.title in values) // select all is never disabled
             })
         }
 
@@ -1318,7 +1353,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return
             }
 
-            config.code = code
+            config.code = code.value
 
             this.appendRulePreview(config)
         }
@@ -1355,7 +1390,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return '*'
             }
 
-            return labels.map(label => label.textContent)
+            return labels.map(label => label.title)
         }
 
         async import() {
@@ -1411,7 +1446,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ;['country', 'transactionType', 'wallet', 'category', 'subcategory'].forEach((column, i) => {
                 head.children[i].querySelector('input[type=checkbox]').checked = config[column].neg
                 ;[...body.children[i].querySelectorAll('input[type=checkbox]')].forEach(checkbox => {
-                    checkbox.checked = (config[column].values === '*') || (config[column].values.indexOf(checkbox.nextElementSibling.textContent) !== -1)
+                    checkbox.checked = (config[column].values === '*') || (config[column].values.indexOf(checkbox.nextElementSibling.title) !== -1)
                 })
 
                 if (column === 'wallet') {
